@@ -36,29 +36,15 @@ export class Preloader extends Phaser.Scene {
             { frameWidth: 1920, frameHeight: 1080 }
         )
         
-        this.load.image('cloud_1', 'Cloud_1.png');
-        this.load.image('cloud_2', 'Cloud_2.png');
+        this.load.image('cloud_1', 'cloud_1.png');
+        this.load.image('cloud_2', 'cloud_2.png');
 
-        this.load.image('pack_b_horizon_1', 'pack_b_horizon_1.png');
-        this.load.image('pack_b_horizon_2', 'pack_b_horizon_2.png');
-        this.load.image('pack_b_horizon_3', 'pack_b_horizon_3.png');
-
-        this.load.image('pack_b_vertical_1', 'pack_b_vertical_1.png');
-        this.load.image('pack_b_vertical_2', 'pack_b_vertical_2.png');
-        this.load.image('pack_b_vertical_3', 'pack_b_vertical_3.png');
-        this.load.image('pack_b_vertical_4', 'pack_b_vertical_4.png');
         
-        this.load.image('pack_l_1','pack_l_1.png')
-        this.load.image('pack_l_2','pack_l_2.png')
-        this.load.image('pack_l_3','pack_l_3.png')
+        
+        
         this.load.image('pack_l_4','pack_l_4.png')
         this.load.image('pack_l_5','pack_l_5.png')
-        this.load.image('pack_l_6','pack_l_6.png')
-        this.load.image('pack_l_7','pack_l_7.png')
-        this.load.image('pack_l_8','pack_l_8.png')
-        this.load.image('pack_l_9','pack_l_9.png')
-        this.load.image('pack_l_10','pack_l_10.png')
-        this.load.image('pack_l_11','pack_l_11.png')
+        
 
         
 
@@ -66,9 +52,8 @@ export class Preloader extends Phaser.Scene {
         this.load.image('rock_2','rock_2.png')
         this.load.image('rock_3','rock_3.png')
         this.load.image('rock_4','rock_4.png') 
-        this.load.image('rock','rock.png') 
         this.load.spritesheet('Player', 
-            'Player.png',
+            'player.png',
             { frameWidth: 83, frameHeight: 118 }
         )
 

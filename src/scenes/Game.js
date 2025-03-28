@@ -16,6 +16,7 @@ export class Game extends Phaser.Scene{
 
         this.speedMultiplier = 1
         this.trailIndex = 0
+        this.obstacleDelay = 3000
 
 
         
@@ -98,11 +99,25 @@ export class Game extends Phaser.Scene{
         this.bg.setOrigin(0,0)
         
 
+        
+
 
 
         this.player = this.physics.add.sprite(930, 340, 'Player',3);
         this.player.setScale(0.85)
-        this.player.setSize(this.player.width * 0.5, this.player.height * 0.7);
+
+        let playerHitboxHeight = this.player.height * 0.4;
+        let playerHitboxWidth = this.player.width * 0.3;
+        let playerHitboxYOffset = this.player.height - playerHitboxHeight;
+
+        this.player.setSize(playerHitboxWidth, playerHitboxHeight);
+        this.player.setOffset(
+            (this.player.width - playerHitboxWidth) / 2,
+            playerHitboxYOffset
+        );
+
+
+
         this.player.setOrigin(0,0)
         this.player.setDepth(2);
         this.player.setCollideWorldBounds(true)
@@ -111,6 +126,9 @@ export class Game extends Phaser.Scene{
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.createAnimations()
+        let snow = this.add.sprite(0, 0, 'snow',0).setDepth(20).setOrigin(0,0).setAlpha(0.7)
+
+        snow.play('snowing');
         this.makeDistance()
 
 
@@ -158,9 +176,9 @@ export class Game extends Phaser.Scene{
 
         this.obstacles = this.physics.add.group()
         
-        this.time.addEvent({
-            delay: 1750,
-            callback: this.spawnObstacleSet,
+        this.spawner = this.time.addEvent({
+            delay: this.obstacleDelay,
+            callback: () => this.spawnTreeAndStoneGroups(3),
             callbackScope: this,
             loop: true
         });
@@ -172,6 +190,19 @@ export class Game extends Phaser.Scene{
 
         // Initial background scroll speed
         
+    }
+
+    addObstaclesTime(){
+        this.obstacleDelay = this.obstacleDelay + this.speedMultiplier/10
+        this.spawner.remove()
+
+        this.spawner = this.time.addEvent({
+            delay: this.obstacleDelay,
+            callback: () => this.spawnTreeAndStoneGroups(3),
+            callbackScope: this,
+            loop: true
+        });
+
     }
 
     updateTrailDelay() {
@@ -192,7 +223,7 @@ export class Game extends Phaser.Scene{
         this.speedLeftX = -5 * this.speedMultiplier; // Scale the downward speed
         this.speedRightX = 5 * this.speedMultiplier; // Scale the downward speed
 
-
+        this.addObstaclesTime()
         this.updateTrailDelay()
     }
 
@@ -222,31 +253,85 @@ export class Game extends Phaser.Scene{
 
 
 
-    spawnObstacleSet() {
-        const obstacleSets = [
-            { horizontal: Phaser.Math.Between(1, 1), little: Phaser.Math.Between(1, 1), stones: Phaser.Math.Between(0, 2) },
-            { vertical: Phaser.Math.Between(1, 1), little: Phaser.Math.Between(1, 1), stones: Phaser.Math.Between(0, 2) },
-            { horizontal: Phaser.Math.Between(1, 1), little: Phaser.Math.Between(1, 1), stones: Phaser.Math.Between(0, 1) },
-            { horizontal: Phaser.Math.Between(1, 1), little: 0, stones: Phaser.Math.Between(1, 2) },
-            { vertical: Phaser.Math.Between(1, 1), little: 0, stones: Phaser.Math.Between(1, 2) },
-            { vertical: Phaser.Math.Between(1, 1), little: Phaser.Math.Between(1, 1), stones: Phaser.Math.Between(0, 2) },
-            { little: Phaser.Math.Between(1, 3), stones: Phaser.Math.Between(1, 3) }
-        ];
+    spawnTreeAndStoneGroups(maxGroups) {
+        const lil_obs_trees = ['pack_l_5', 'pack_l_4'];
+        const lil_obs_stones = ['rock_1', 'rock_2', 'rock_3', 'rock_4'];
 
-        let selectedSet = Phaser.Utils.Array.GetRandom(obstacleSets);
+        for (let i = 0; i < maxGroups; i++) {
+            // Base position for this group
+            let groupX = Phaser.Math.Between(100, 1800);
+            let groupY = 1300; // Start offscreen
 
-        if (selectedSet.horizontal) {
-            this.spawnHorizontal(selectedSet.horizontal);
+            // Spawn 1-3 trees in this group
+            const treeCount = Phaser.Math.Between(1, 3);
+            for (let t = 0; t < treeCount; t++) {
+                let offsetX = Phaser.Math.Between(-450, 450); // Offset around group center
+                let offsetY = Phaser.Math.Between(-300, 300);
+                let obs_key = Phaser.Utils.Array.GetRandom(lil_obs_trees);
+
+                this.createTree(groupX + offsetX, groupY + offsetY, obs_key);
+            }
+
+            // Spawn 2-4 stones around the trees
+            const stoneCount = Phaser.Math.Between(1, 2);
+            for (let s = 0; s < stoneCount; s++) {
+                let offsetX = Phaser.Math.Between(-300, 300); // Wider spread than trees
+                let offsetY = Phaser.Math.Between(-250, 200); // Stones can be slightly lower
+                let obs_key = Phaser.Utils.Array.GetRandom(lil_obs_stones);
+
+                this.createStone(groupX + offsetX, groupY + offsetY, obs_key);
+            }
         }
-        if (selectedSet.vertical) {
-            this.spawnVertical(selectedSet.vertical);
-        }
-        if (selectedSet.little) {
-            this.spawnLitleObs(selectedSet.little);
-        }
-        if (selectedSet.stones) {
-            this.spawnStones(selectedSet.stones);
-        }
+    }
+
+    createTree(x, y, obs_key) {
+        let obstacle = this.physics.add.image(x, y, obs_key);
+        obstacle.setDepth(3);
+        
+        let hitboxHeight = obstacle.height * 0.1;
+        let hitboxWidth = obstacle.width * 0.2;
+        let hitboxYOffset = obstacle.height - hitboxHeight;
+
+        obstacle.setSize(hitboxWidth, hitboxHeight);
+        obstacle.setOffset(
+            (obstacle.width - hitboxWidth) / 2,
+            hitboxYOffset
+        );
+
+        let shadow = this.add.image(x + 25, y + 25, obs_key);
+        shadow.setTint(0x888888);
+        shadow.setAlpha(0.1);
+        shadow.setDepth(4);
+
+        this.obstacles.add(obstacle);
+        obstacle.checkWorldBounds = true;
+        obstacle.outOfBoundsKill = true;
+        obstacle.shadow = shadow;
+    }
+
+    createStone(x, y, obs_key) {
+        let obstacle = this.physics.add.image(x, y, obs_key);
+        obstacle.setDepth(3);
+
+        let shadow = this.add.image(x + 25, y + 25, obs_key);
+        shadow.setTint(0x888888);
+        shadow.setAlpha(0.1);
+        shadow.setDepth(3);
+
+        let hitboxHeight = obstacle.height * 0.6;
+        let hitboxWidth = obstacle.width * 0.6;
+        let hitboxYOffset = obstacle.height - hitboxHeight;
+
+        obstacle.setSize(hitboxWidth, hitboxHeight);
+        obstacle.setOffset(
+            (obstacle.width - hitboxWidth) / 2,
+            hitboxYOffset - 20
+        );
+
+        this.obstacles.add(obstacle);
+        obstacle.checkWorldBounds = true;
+        obstacle.outOfBoundsKill = true;
+        obstacle.shadow = shadow;
     }
 
     spawnCloud() {
@@ -268,10 +353,19 @@ export class Game extends Phaser.Scene{
             cloud.setScale(Phaser.Math.FloatBetween(1, 1.1)); // Random size
             cloud.setDepth(10);
 
+            let shadow = this.add.image(x + 150, y - 300, cloudKey); // Offset for light effect
+            shadow.setTint(0x888888); // Make it black
+            shadow.setAlpha(0.1); // Make it semi-transparent
+            shadow.setDepth(1); // Behind the obstacle
+            shadow.setScale(1.2)
+
+
             // Parallax effect: Slower clouds move slower
             cloud.speed = this.speedY/4;
             cloud.update = () => {
                     cloud.y -= cloud.speed;
+                    shadow.y = cloud.y - 300
+                    shadow.x = cloud.x + 150
                     if (cloud.y < -150) { // If cloud moves off-screen, remove it
                         cloud.destroy();
                         // Spawn new cloud only when old one is gone
@@ -302,107 +396,8 @@ export class Game extends Phaser.Scene{
         
     }
 
-    spawnLitleObs(max){
-        let x = Phaser.Math.Between(100, 1800); // Random X position
-        let y = 1300; // Start offscreen
-        let lil_obs =['pack_l_1','pack_l_2','pack_l_3','pack_l_4','pack_l_5','pack_l_6','pack_l_7','pack_l_8','pack_l_9','pack_l_10','pack_l_11']
-        let obs_key = Phaser.Utils.Array.GetRandom(lil_obs); // Pick a random cloud
 
-        for (let i = 0; i < max; i++) {
-            let obstacle = this.physics.add.image(x,y, obs_key);
-            obstacle.setDepth(3);
-            let hitboxHeight = obstacle.height * 0.3; // Adjust height for bottom hitbox
-            let hitboxWidth = obstacle.width * 0.6; // Adjust width if needed
-            obstacle.setSize(hitboxWidth, hitboxHeight);
-            obstacle.setOffset(0, obstacle.height - hitboxHeight);
-            
-
-            this.obstacles.add(obstacle);
-            obstacle.checkWorldBounds = true;
-            obstacle.outOfBoundsKill = true;
-        }
-    }
-
-
-    spawnStones(max){
-        let x = Phaser.Math.Between(100, 1800); // Random X position
-        let y = 1600; // Start offscreen
-        let lil_obs =['rock_1','rock_2','rock_3','rock_4']
-        let obs_key = Phaser.Utils.Array.GetRandom(lil_obs); // Pick a random cloud
-
-        for (let i = 0; i < max; i++) {
-            let obstacle = this.physics.add.image(x,y, obs_key);
-            obstacle.setDepth(3);
-            let hitboxHeight = obstacle.height * 0.9; // Adjust height for bottom hitbox
-            let hitboxWidth = obstacle.width * 0.9; // Adjust width if needed
-            obstacle.setSize(hitboxWidth, hitboxHeight);
-            obstacle.setOffset(0, obstacle.height - hitboxHeight);
-
-            
-            // Offset the hitbox to the bottom of the sprite
-
-            this.obstacles.add(obstacle);
-            obstacle.checkWorldBounds = true;
-            obstacle.outOfBoundsKill = true;
-        }
-    }
-
-    spawnHorizontal(max){
-        let x1 = Phaser.Math.Between(0, 100); // Random X position
-        let x2 = Phaser.Math.Between(1500, 2000); // Random X position
-        let allx =[x1,x2]
-        let x = Phaser.Utils.Array.GetRandom(allx); // Pick a random cloud
-        let y = 1600; // Start offscreen
-        let lil_obs =['pack_b_horizon_1','pack_b_horizon_2','pack_b_horizon_3']
-        let obs_key = Phaser.Utils.Array.GetRandom(lil_obs); // Pick a random cloud
-
-        for (let i = 0; i < max; i++) {
-            let obstacle = this.physics.add.image(x,y, obs_key);
-            obstacle.setDepth(3);
-            let hitboxHeight = obstacle.height * 0.3; // Adjust height for bottom hitbox
-            let hitboxWidth = obstacle.width * 0.6; // Adjust width if needed
-            
-            obstacle.setSize(hitboxWidth, hitboxHeight);
-            obstacle.setOffset(0, (obstacle.height - hitboxHeight)/2);
-
-            // Offset the hitbox to the bottom of the sprite
-           
-
-            // Offset the hitbox to the bottom of the sprite
-
-            this.obstacles.add(obstacle);
-            obstacle.checkWorldBounds = true;
-            obstacle.outOfBoundsKill = true;
-        }
-    }
-
-
-    spawnVertical(max){
-        let x = Phaser.Math.Between(100, 1900); // Random X position
-        let y = 1600; // Start offscreen
-        let lil_obs =['pack_b_vertical_1','pack_b_vertical_2','pack_b_vertical_3','pack_b_vertical_4']
-        let obs_key = Phaser.Utils.Array.GetRandom(lil_obs); // Pick a random cloud
-
-        for (let i = 0; i < max; i++) {
-            let obstacle = this.physics.add.image(x,y, obs_key);
-            obstacle.setDepth(3);
-            let hitboxHeight = obstacle.height * 0.3; // Adjust height for bottom hitbox
-            let hitboxWidth = obstacle.width * 0.6; // Adjust width if needed
-            
-
-            obstacle.setSize(hitboxWidth, hitboxHeight);
-            obstacle.setOffset(0, obstacle.height - hitboxHeight);
-            // Offset the hitbox to the bottom of the sprite
-            // obstacle.setOffset((obstacle.width - hitboxWidth) / 2, );
-
-            // Offset the hitbox to the bottom of the sprite
-            
-
-            this.obstacles.add(obstacle);
-            obstacle.checkWorldBounds = true;
-            obstacle.outOfBoundsKill = true;
-        }
-    }
+    
 
 
     createAnimations(){
@@ -534,12 +529,14 @@ export class Game extends Phaser.Scene{
         this.obstacles.children.iterate((obstacle) => {
             if(obstacle){
                 obstacle.y -= this.speedY*0.8; // Move obstacle up normally
-
+                obstacle.shadow.y = obstacle.y -25
                 // Move obstacles in the opposite direction of player's movement
                 if (this.cursors.left.isDown || this.lastPressedKey == 'left') {
                     obstacle.x += Math.abs(this.speedLeftX)*0.8; // Move right if player moves left
+                    obstacle.shadow.x = obstacle.x+25
                 } else if (this.cursors.right.isDown || this.lastPressedKey == 'right') {
                     obstacle.x -= Math.abs(this.speedRightX)*0.8; // Move left if player moves right
+                    obstacle.shadow.x = obstacle.x + 25
                 }
 
                 if (obstacle.y < -500) { // 50px buffer below the screen
@@ -578,6 +575,7 @@ export class Game extends Phaser.Scene{
             let gameOverText = this.add.image(width / 2, height / 3,'gameover_text')
 
             gameOverText.setOrigin(0.5);
+            gameOverText.setDepth(100)
 
             // Final Distance Text
             let finalDistanceText = this.add.text(width / 2, height / 2.2, `Distance: ${parseInt(this.distance)}m`, {
@@ -586,6 +584,7 @@ export class Game extends Phaser.Scene{
                 fontFamily: 'Minecraft'
             });
             finalDistanceText.setOrigin(0.5);
+            finalDistanceText.setDepth(100)
 
             // Retry button
             let retryButton = this.add.text(width / 2, height / 1.8, 'Retry', {
@@ -597,6 +596,7 @@ export class Game extends Phaser.Scene{
             });
             retryButton.setOrigin(0.5);
             retryButton.setInteractive();
+            retryButton.setDepth(100)
 
             // Restart the game when retry is clicked
             retryButton.on('pointerdown', () => {
@@ -614,6 +614,7 @@ export class Game extends Phaser.Scene{
 
                 this.speedMultiplier = 1
                 this.trailIndex = 0
+                this.obstacleDelay = 3000
                 this.physics.resume()
 
 

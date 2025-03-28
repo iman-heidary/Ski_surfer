@@ -17,7 +17,7 @@ const config = {
     backgroundColor: '#2d3436',
     physics: { default: 'arcade' ,arcade: {
             gravity: { y: 0 },
-            debug: false
+            debug: false,
         }
         },
     scale: {
@@ -25,15 +25,22 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
+        
         Preloader,
         Game,
         GameOver,
 
+
+
+
+
+        
+
     ],
 
     // fps: {
-        // target: 100, // Limit to 30 FPS (you can adjust this value)
-        // forceSetTimeOut: true // This helps to reduce CPU usage and set a lower frame rate
+        // target: 120, // Limit to 30 FPS (you can adjust this value)
+        // forceSetTimeOut: false // This helps to reduce CPU usage and set a lower frame rate
     // }
 };
 
