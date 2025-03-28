@@ -14,7 +14,7 @@ export class Game extends Phaser.Scene{
         this.bgSpeedX = this.speedDownX
         this.bgSpeedY = this.speedY
 
-        this.speedMultiplier = 200
+        this.speedMultiplier = 100
         this.trailIndex = 0
         this.obstacleDelay = 3000
         this.spawnNumber = 3
@@ -195,11 +195,11 @@ export class Game extends Phaser.Scene{
 
     addObstaclesTime(){
         this.obstacleDelay = this.obstacleDelay - this.speedMultiplier
-        this.spawnNumber = parseFloat(this.spawnNumber+0.)
+        this.spawnNumber = parseFloat(this.spawnNumber+0.1)
 
         let spn = parseInt(this.spawnNumber)
 
-        if(spn >= 8) {spn = 8}
+        if(spn >= 5) {spn = 5}
         console.log(`${this.spawnNumber} /// ${spn}`)
         this.spawner.remove()
 
