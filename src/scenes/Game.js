@@ -17,6 +17,7 @@ export class Game extends Phaser.Scene{
         this.speedMultiplier = 1
         this.trailIndex = 0
         this.obstacleDelay = 3000
+        this.spawnNumber = 3
 
 
         
@@ -178,7 +179,7 @@ export class Game extends Phaser.Scene{
         
         this.spawner = this.time.addEvent({
             delay: this.obstacleDelay,
-            callback: () => this.spawnTreeAndStoneGroups(3),
+            callback: () => this.spawnTreeAndStoneGroups(this.spawnNumber),
             callbackScope: this,
             loop: true
         });
@@ -193,12 +194,18 @@ export class Game extends Phaser.Scene{
     }
 
     addObstaclesTime(){
-        this.obstacleDelay = this.obstacleDelay + this.speedMultiplier/10
+        this.obstacleDelay = this.obstacleDelay + this.speedMultiplier/5
+        this.spawnNumber = parseFloat(this.spawnNumber+0.2)
+
+        let spn = parseInt(this.spawnNumber)
+
+        if(spn >= 8) {spn = 8}
+        console.log(`${this.spawnNumber} /// ${spn}`)
         this.spawner.remove()
 
         this.spawner = this.time.addEvent({
             delay: this.obstacleDelay,
-            callback: () => this.spawnTreeAndStoneGroups(3),
+            callback: () => this.spawnTreeAndStoneGroups(spn),
             callbackScope: this,
             loop: true
         });
@@ -621,6 +628,7 @@ export class Game extends Phaser.Scene{
                 this.trailIndex = 0
                 this.obstacleDelay = 3000
                 this.physics.resume()
+                this.spawnNumber = 3
 
 
             });
