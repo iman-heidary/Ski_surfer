@@ -35,6 +35,13 @@ export class Preloader extends Phaser.Scene {
             'gameover.png',
             { frameWidth: 580, frameHeight: 227 }
         )
+
+        this.load.spritesheet('retry_btn', 
+            'retry.png',
+            { frameWidth: 520, frameHeight: 233.2 }
+        )
+
+
         this.load.image('gameover_text', 'gameover_text.png');
 
         this.load.spritesheet('snow', 

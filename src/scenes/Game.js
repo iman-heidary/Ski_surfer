@@ -137,9 +137,9 @@ export class Game extends Phaser.Scene{
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.createAnimations()
-        // let snow = this.add.sprite(0, 0, 'snow',0).setDepth(20).setOrigin(0,0).setAlpha(0.7)
+        let snow = this.add.sprite(0, 0, 'snow',0).setDepth(20).setOrigin(0,0).setAlpha(0.7)
 
-        // snow.play('snowing');
+        snow.play('snowing');
 
         this.partial_effect = this.physics.add.sprite(930+25, 340+25,'partial',1)
         
@@ -450,6 +450,12 @@ export class Game extends Phaser.Scene{
             frames: this.anims.generateFrameNumbers('Player', { start: 5, end: 3 }),
             frameRate: 20
         });
+
+        this.anims.create({
+            key:'retry',
+            frames:this.anims.generateFrameNumbers('retry_btn',{start:0,end:1}),
+            frameRate:20,
+        })
 
         this.anims.create({
             key: 'right',
