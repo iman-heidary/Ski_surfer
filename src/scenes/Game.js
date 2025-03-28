@@ -169,7 +169,7 @@ export class Game extends Phaser.Scene{
         
 
         this.time.addEvent({
-            delay: 8000, // Every 5 seconds
+            delay: 12000, // Every 5 seconds
             callback: this.spawnCloud,
             callbackScope: this,
             loop: true
@@ -272,7 +272,7 @@ export class Game extends Phaser.Scene{
 
     for (let i = 0; i < maxGroups; i++) {
         // Base position for this group
-        let groupX = Phaser.Math.Between(100, 1800);
+        let groupX = Phaser.Math.Between(-150, 2100);
         let groupY = 1300; // Start offscreen
 
         // Spawn stones first (they'll be behind trees)
