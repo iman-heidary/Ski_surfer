@@ -195,7 +195,7 @@ export class Game extends Phaser.Scene{
 
     addObstaclesTime(){
         this.obstacleDelay = this.obstacleDelay - this.speedMultiplier
-        this.spawnNumber = parseFloat(this.spawnNumber+0.05)
+        this.spawnNumber = parseFloat(this.spawnNumber+0.)
 
         let spn = parseInt(this.spawnNumber)
 
@@ -224,11 +224,10 @@ export class Game extends Phaser.Scene{
                 }
 
     increaseSpeed(){
-        this.speedMultiplier += 0.1; // Increase speed over time
-        this.speedY = 6 * this.speedMultiplier; // Scale the downward speed.
+        this.speedY = 6 +0.2; // Scale the downward speed.
 
-        this.speedLeftX = -5 * this.speedMultiplier; // Scale the downward speed
-        this.speedRightX = 5 * this.speedMultiplier; // Scale the downward speed
+        this.speedLeftX = -5 +0.2; // Scale the downward speed
+        this.speedRightX = 5 +0.2; // Scale the downward speed
 
         this.addObstaclesTime()
         this.updateTrailDelay()
