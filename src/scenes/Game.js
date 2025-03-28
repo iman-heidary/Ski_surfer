@@ -14,7 +14,7 @@ export class Game extends Phaser.Scene{
         this.bgSpeedX = this.speedDownX
         this.bgSpeedY = this.speedY
 
-        this.speedMultiplier = 1
+        this.speedMultiplier = 200
         this.trailIndex = 0
         this.obstacleDelay = 3000
         this.spawnNumber = 3
