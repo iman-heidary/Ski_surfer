@@ -25,6 +25,12 @@ export class Preloader extends Phaser.Scene {
             'play.png',
             { frameWidth: 363, frameHeight: 227 }
         )
+
+        this.load.spritesheet('partial', 
+            'partial.png',
+            { frameWidth: 83.5, frameHeight: 74.1 }
+        )
+
         this.load.spritesheet('gameover_btn', 
             'gameover.png',
             { frameWidth: 580, frameHeight: 227 }

@@ -14,7 +14,8 @@ export class Game extends Phaser.Scene{
         this.bgSpeedX = this.speedDownX
         this.bgSpeedY = this.speedY
 
-        this.speedMultiplier = 100
+        this.speedMultiplier = 1
+        this.obstacleDelayPlus = 100
         this.trailIndex = 0
         this.obstacleDelay = 3000
         this.spawnNumber = 3
@@ -93,6 +94,7 @@ export class Game extends Phaser.Scene{
     create() {
         this.bg = this.add.tileSprite(0, 0, 1920, 1080, 'Texture')
         this.bg.setDepth(0);
+        this.bg.setAlpha(0.95)
         let bgScaleX = this.scale.width / this.bg.width;
         let bgScaleY = this.scale.height / this.bg.height;
         let bgScale = Math.max(bgScaleX, bgScaleY);
@@ -117,6 +119,8 @@ export class Game extends Phaser.Scene{
             playerHitboxYOffset
         );
 
+        
+
 
 
         this.player.setOrigin(0,0)
@@ -124,12 +128,25 @@ export class Game extends Phaser.Scene{
         this.player.setCollideWorldBounds(true)
 
 
+        this.playerShadow = this.physics.add.sprite(930+25, 340+25, 'Player',3); 
+        this.playerShadow.setTint(0x888888);
+        this.playerShadow.setAlpha(0.07);
+        this.playerShadow.setDepth(3);
+
+
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.createAnimations()
-        let snow = this.add.sprite(0, 0, 'snow',0).setDepth(20).setOrigin(0,0).setAlpha(0.7)
+        // let snow = this.add.sprite(0, 0, 'snow',0).setDepth(20).setOrigin(0,0).setAlpha(0.7)
 
-        snow.play('snowing');
+        // snow.play('snowing');
+
+        this.partial_effect = this.physics.add.sprite(930+25, 340+25,'partial',1)
+        
+        this.partial_effect.setDepth(1)
+        this.partial_effect.setScale(1.3);
+        this.partial_effect.play('partials_effect')
+
         this.makeDistance()
 
 
@@ -194,13 +211,14 @@ export class Game extends Phaser.Scene{
     }
 
     addObstaclesTime(){
-        this.obstacleDelay = this.obstacleDelay - this.speedMultiplier
+        this.obstacleDelay = this.obstacleDelay - this.obstacleDelayPlus
+        if (this.obstacleDelay <= 500){this.obstacleDelay = 500}
         this.spawnNumber = parseFloat(this.spawnNumber+0.1)
 
         let spn = parseInt(this.spawnNumber)
 
         if(spn >= 5) {spn = 5}
-        console.log(`${this.spawnNumber} /// ${spn}`)
+        console.log(`spawn  numnber : ${spn}  | obstecel delay : ${this.obstacleDelay}`)
         this.spawner.remove()
 
         this.spawner = this.time.addEvent({
@@ -224,10 +242,12 @@ export class Game extends Phaser.Scene{
                 }
 
     increaseSpeed(){
-        this.speedY = 6 +0.2; // Scale the downward speed.
-
-        this.speedLeftX = -5 +0.2; // Scale the downward speed
-        this.speedRightX = 5 +0.2; // Scale the downward speed
+        this.speedY = 6 * this.speedMultiplier ; // Scale the downward speed.
+        if(this.speedY >= 20) {this.speedY=20}
+        this.speedMultiplier += 0.05
+            console.log(`speed is ${this.speedY}`)
+        this.speedLeftX = -5 *1.1; // Scale the downward speed
+        this.speedRightX = 5 *1.1; // Scale the downward speed
 
         this.addObstaclesTime()
         this.updateTrailDelay()
@@ -458,6 +478,15 @@ export class Game extends Phaser.Scene{
             frameRate: 5,
             repeat:-1
         });
+
+        this.anims.create({
+            key: 'partials_effect',
+            frames: this.anims.generateFrameNumbers('partial', { start: 0, end: 2 }),
+            frameRate: 10,
+            repeat:-1
+        });
+
+        
     }
 
 
@@ -470,6 +499,10 @@ export class Game extends Phaser.Scene{
             // this.player.setVelocityY(speed);
 
             this.lastPressedKey == 'left' ?  null:this.player.anims.play('left', true)
+            this.lastPressedKey == 'left' ?  null:this.playerShadow.anims.play('left', true)
+
+            this.partial_effect.setAngle(45)
+            this.partial_effect.x += 30
             
             this.lastPressedKey = 'left'
         } 
@@ -482,7 +515,10 @@ export class Game extends Phaser.Scene{
             
 
             this.lastPressedKey == 'right' ?  null:this.player.anims.play('right', true)
+            this.lastPressedKey == 'right' ?  null:this.playerShadow.anims.play('right', true)
+            this.partial_effect.x -= 30
             this.lastPressedKey = 'right'
+            this.partial_effect.setAngle(-45)
         } 
 
         else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
@@ -492,9 +528,11 @@ export class Game extends Phaser.Scene{
 
             if (this.lastPressedKey != 'down') {
                 this.lastPressedKey == 'right' ? this.player.anims.play('turnFromRight', true) : this.player.anims.play('turnFromLeft', true)
+                this.lastPressedKey == 'right' ?  this.playerShadow.anims.play('turnFromRight', true):this.playerShadow.anims.play('turnFromLeft', true)
             }
             
-            
+            this.partial_effect.setAngle(0)
+            this.partial_effect.x = 930+25
             
             this.lastPressedKey = 'down'
         } 
@@ -518,7 +556,7 @@ export class Game extends Phaser.Scene{
         
 
         // Scroll the background based on speed
-        this.bg.tilePositionX += this.bgSpeedX;
+        this.bg.tilePositionX += this.bgSpeedX/1.2;
         this.bg.tilePositionY += this.bgSpeedY;
 
         
@@ -624,6 +662,7 @@ export class Game extends Phaser.Scene{
                 this.bgSpeedY = this.speedY
 
                 this.speedMultiplier = 1
+                this.obstacleDelayPlus = 100
                 this.trailIndex = 0
                 this.obstacleDelay = 3000
                 this.physics.resume()
