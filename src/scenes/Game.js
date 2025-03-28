@@ -254,39 +254,44 @@ export class Game extends Phaser.Scene{
 
 
     spawnTreeAndStoneGroups(maxGroups) {
-        const lil_obs_trees = ['pack_l_5', 'pack_l_4'];
-        const lil_obs_stones = ['rock_1', 'rock_2', 'rock_3', 'rock_4'];
+    const lil_obs_trees = ['pack_l_5', 'pack_l_4'];
+    const lil_obs_stones = ['rock_1', 'rock_2', 'rock_3', 'rock_4'];
 
-        for (let i = 0; i < maxGroups; i++) {
-            // Base position for this group
-            let groupX = Phaser.Math.Between(100, 1800);
-            let groupY = 1300; // Start offscreen
+    // Define depth layers
+    const DEPTH_LAYERS = {
+        STONES: 3,
+        TREES: 4,    // Higher than stones
+        SHADOWS: 2   // Lower than both objects
+    };
 
-            // Spawn 1-3 trees in this group
-            const treeCount = Phaser.Math.Between(1, 3);
-            for (let t = 0; t < treeCount; t++) {
-                let offsetX = Phaser.Math.Between(-450, 450); // Offset around group center
-                let offsetY = Phaser.Math.Between(-300, 300);
-                let obs_key = Phaser.Utils.Array.GetRandom(lil_obs_trees);
+    for (let i = 0; i < maxGroups; i++) {
+        // Base position for this group
+        let groupX = Phaser.Math.Between(100, 1800);
+        let groupY = 1300; // Start offscreen
 
-                this.createTree(groupX + offsetX, groupY + offsetY, obs_key);
-            }
+        // Spawn stones first (they'll be behind trees)
+        const stoneCount = Phaser.Math.Between(1, 2);
+        for (let s = 0; s < stoneCount; s++) {
+            let offsetX = Phaser.Math.Between(-300, 300);
+            let offsetY = Phaser.Math.Between(-250, 200)+500;
+            let obs_key = Phaser.Utils.Array.GetRandom(lil_obs_stones);
+            this.createStone(groupX + offsetX, groupY + offsetY, obs_key, DEPTH_LAYERS.STONES, DEPTH_LAYERS.SHADOWS);
+        }
 
-            // Spawn 2-4 stones around the trees
-            const stoneCount = Phaser.Math.Between(1, 2);
-            for (let s = 0; s < stoneCount; s++) {
-                let offsetX = Phaser.Math.Between(-300, 300); // Wider spread than trees
-                let offsetY = Phaser.Math.Between(-250, 200); // Stones can be slightly lower
-                let obs_key = Phaser.Utils.Array.GetRandom(lil_obs_stones);
-
-                this.createStone(groupX + offsetX, groupY + offsetY, obs_key);
-            }
+        // Spawn trees last (they'll be in front)
+        const treeCount = Phaser.Math.Between(1, 3);
+        for (let t = 0; t < treeCount; t++) {
+            let offsetX = Phaser.Math.Between(-450, 450);
+            let offsetY = Phaser.Math.Between(-300, 300)+500;
+            let obs_key = Phaser.Utils.Array.GetRandom(lil_obs_trees);
+            this.createTree(groupX + offsetX, groupY + offsetY, obs_key, DEPTH_LAYERS.TREES, DEPTH_LAYERS.SHADOWS);
+        }
         }
     }
 
-    createTree(x, y, obs_key) {
+    createTree(x, y, obs_key, depth = 4, shadowDepth = 2) {
         let obstacle = this.physics.add.image(x, y, obs_key);
-        obstacle.setDepth(3);
+        obstacle.setDepth(depth);
         
         let hitboxHeight = obstacle.height * 0.1;
         let hitboxWidth = obstacle.width * 0.2;
@@ -301,7 +306,7 @@ export class Game extends Phaser.Scene{
         let shadow = this.add.image(x + 25, y + 25, obs_key);
         shadow.setTint(0x888888);
         shadow.setAlpha(0.1);
-        shadow.setDepth(4);
+        shadow.setDepth(shadowDepth);
 
         this.obstacles.add(obstacle);
         obstacle.checkWorldBounds = true;
@@ -309,14 +314,14 @@ export class Game extends Phaser.Scene{
         obstacle.shadow = shadow;
     }
 
-    createStone(x, y, obs_key) {
+    createStone(x, y, obs_key, depth = 3, shadowDepth = 2) {
         let obstacle = this.physics.add.image(x, y, obs_key);
-        obstacle.setDepth(3);
+        obstacle.setDepth(depth);
 
         let shadow = this.add.image(x + 25, y + 25, obs_key);
         shadow.setTint(0x888888);
         shadow.setAlpha(0.1);
-        shadow.setDepth(3);
+        shadow.setDepth(shadowDepth);
 
         let hitboxHeight = obstacle.height * 0.6;
         let hitboxWidth = obstacle.width * 0.6;
