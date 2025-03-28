@@ -194,8 +194,8 @@ export class Game extends Phaser.Scene{
     }
 
     addObstaclesTime(){
-        this.obstacleDelay = this.obstacleDelay + this.speedMultiplier/5
-        this.spawnNumber = parseFloat(this.spawnNumber+0.2)
+        this.obstacleDelay = this.obstacleDelay - this.speedMultiplier/5
+        this.spawnNumber = parseFloat(this.spawnNumber+0.1)
 
         let spn = parseInt(this.spawnNumber)
 
